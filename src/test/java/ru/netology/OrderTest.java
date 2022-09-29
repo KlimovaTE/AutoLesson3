@@ -85,6 +85,6 @@ public class OrderTest {
         form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
         form.findElement(By.cssSelector("[name=phone]")).sendKeys("+75550000000");
         form.findElement(By.cssSelector("[type=button]")).click();
-        assertNotNull(form.findElement(By.cssSelector("label[class*=input_invalid]")).getSize());
+        assertNotNull(form.findElement(By.cssSelector("label.input_invalid")));
     }
 }
