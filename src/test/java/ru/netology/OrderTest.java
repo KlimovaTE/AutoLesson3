@@ -29,7 +29,7 @@ public class OrderTest {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
-        driver = new ChromeDriver();
+        driver = new ChromeDriver(options);
     }
 
     @AfterEach
@@ -39,7 +39,7 @@ public class OrderTest {
     }
 
     @Test
-    void shouldTestV2() {
+    void shouldSendFormSuccess() {
         driver.get("http://localhost:9999");
         WebElement form = driver.findElement(By.cssSelector("[action='/']"));
         form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
