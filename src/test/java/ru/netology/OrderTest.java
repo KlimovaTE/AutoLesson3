@@ -13,8 +13,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTest {
     private WebDriver driver;
@@ -31,6 +30,7 @@ public class OrderTest {
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
         driver = new ChromeDriver(options);
+        driver.get("http://localhost:9999");
     }
 
     @AfterEach
@@ -41,7 +41,6 @@ public class OrderTest {
 
     @Test
     void shouldSendFormSuccess() {
-        driver.get("http://localhost:9999");
         WebElement form = driver.findElement(By.cssSelector("[action='/']"));
         form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
         form.findElement(By.cssSelector("[name=phone]")).sendKeys("+75550000000");
@@ -54,37 +53,59 @@ public class OrderTest {
 
     @Test
     void shouldGetErrorIfIncorrectNameOrSurname() {
-        driver.get("http://localhost:9999");
         WebElement form = driver.findElement(By.cssSelector("[action='/']"));
         form.findElement(By.cssSelector("[name=name]")).sendKeys("123");
         form.findElement(By.cssSelector("[name=phone]")).sendKeys("+75550000000");
         form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
         form.findElement(By.cssSelector("[type=button]")).click();
         String expected = "Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.";
-        String actual = driver.findElement(By.cssSelector("[data-test-id=name] [class=input__sub]")).getText();
+        String actual = driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).getText();
         assertEquals(expected, actual.trim());
     }
 
     @Test
     void shouldGetErrorIfIncorrectPhoneNumber() {
-        driver.get("http://localhost:9999");
         WebElement form = driver.findElement(By.cssSelector("[action='/']"));
         form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
         form.findElement(By.cssSelector("[name=phone]")).sendKeys("75550000000");
         form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
         form.findElement(By.cssSelector("[type=button]")).click();
         String expected = "Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.";
-        String actual = driver.findElement(By.cssSelector("[data-test-id=phone] [class=input__sub]")).getText();
+        String actual = driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).getText();
+        assertEquals(expected, actual.trim());
+    }
+
+    @Test
+    void shouldGetErrorIfNameAndSurnameIsEmpty() {
+        WebElement form = driver.findElement(By.cssSelector("[action='/']"));
+        form.findElement(By.cssSelector("[name=name]")).sendKeys("");
+        form.findElement(By.cssSelector("[name=phone]")).sendKeys("+75550000000");
+        form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        form.findElement(By.cssSelector("[type=button]")).click();
+        String expected = "Поле обязательно для заполнения";
+        String actual = driver.findElement(By.cssSelector("[data-test-id=name].input_invalid .input__sub")).getText();
+        assertEquals(expected, actual.trim());
+    }
+
+    @Test
+    void shouldGetErrorIfPhoneNumberIsEmpty() {
+        WebElement form = driver.findElement(By.cssSelector("[action='/']"));
+        form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
+        form.findElement(By.cssSelector("[name=phone]")).sendKeys("");
+        form.findElement(By.cssSelector("[data-test-id=agreement]")).click();
+        form.findElement(By.cssSelector("[type=button]")).click();
+        String expected = "Поле обязательно для заполнения";
+        String actual = driver.findElement(By.cssSelector("[data-test-id=phone].input_invalid .input__sub")).getText();
         assertEquals(expected, actual.trim());
     }
 
     @Test
     void shouldGetErrorIfCheckboxIsNotChecked() {
-        driver.get("http://localhost:9999");
         WebElement form = driver.findElement(By.cssSelector("[action='/']"));
         form.findElement(By.cssSelector("[name=name]")).sendKeys("Нет Войне");
         form.findElement(By.cssSelector("[name=phone]")).sendKeys("+75550000000");
         form.findElement(By.cssSelector("[type=button]")).click();
-        assertNotNull(form.findElement(By.cssSelector("label.input_invalid")));
+        boolean errorIsDisplayed = form.findElement(By.cssSelector("label.input_invalid")).isDisplayed();
+        assertTrue(errorIsDisplayed);
     }
 }
